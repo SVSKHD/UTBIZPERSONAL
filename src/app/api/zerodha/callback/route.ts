@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import { KiteConnect } from "kiteconnect";
 
 const apiKey = process.env.KITE_API_KEY;
@@ -8,27 +8,27 @@ if (!apiKey || !apiSecret) {
   throw new Error("KITE_API_KEY and KITE_API_SECRET must be defined in environment variables");
 }
 
-export default async function ZerodhaCallBack(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "POST") {
-    const { requestToken } = req.body;
+export async function POST(req: Request) {
+  const body = await req.json();
+  const { requestToken } = body;
 
-    if (!requestToken) {
-      return res.status(400).json({ error: "Request token is required" });
-    }
-
-    const kc = new KiteConnect({ api_key: apiKey });
-
-    try {
-      const session = await kc.generateSession(requestToken, apiSecret);
-      kc.setAccessToken(session.access_token);
-
-      // Send only the access token
-      res.status(200).json({ accessToken: session.access_token });
-    } catch (error) {
-      console.error("Error generating session:", error);
-      res.status(500).json({ error: "Failed to generate session" });
-    }
-  } else {
-    res.status(405).json({ error: "Method not allowed" });
+  if (!requestToken) {
+    return NextResponse.json({ error: "Request token is required" }, { status: 400 });
   }
+
+  const kc = new KiteConnect({ api_key: apiKey });
+
+  try {
+    const session = await kc.generateSession(requestToken, apiSecret);
+    kc.setAccessToken(session.access_token);
+
+    return NextResponse.json({ accessToken: session.access_token }, { status: 200 });
+  } catch (error) {
+    console.error("Error generating session:", error);
+    return NextResponse.json({ error: "Failed to generate session" }, { status: 500 });
+  }
+}
+
+export function OPTIONS() {
+  return NextResponse.json({ allow: ["POST"] }, { status: 200 });
 }
