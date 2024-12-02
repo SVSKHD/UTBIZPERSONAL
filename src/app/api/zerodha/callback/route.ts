@@ -16,10 +16,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Request token is required" }, { status: 400 });
   }
 
-  const kc = new KiteConnect({ api_key: apiKey });
+  const kc = new KiteConnect({ api_key: apiKey! });
 
   try {
-    const session = await kc.generateSession(requestToken, apiSecret);
+    const session = await kc.generateSession(requestToken, apiSecret!);
     kc.setAccessToken(session.access_token);
 
     return NextResponse.json({ accessToken: session.access_token }, { status: 200 });
