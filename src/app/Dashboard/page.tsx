@@ -29,9 +29,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (requestToken) {
-      console.log("Request Token:", requestToken);
+      console.log("Request Token:", requestToken, router);
     }
-  }, [requestToken]);
+  }, [router,requestToken]);
 
   const handleLogin = async (): Promise<void> => {
     setIsLoginInitiated(true);

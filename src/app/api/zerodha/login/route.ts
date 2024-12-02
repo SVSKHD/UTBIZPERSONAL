@@ -3,7 +3,11 @@ import { KiteConnect } from "kiteconnect";
 
 const apiKey = process.env.KITE_API_KEY;
 
-export const GET = async (req: NextRequest) => {
+if (!apiKey) {
+  throw new Error("KITE_API_KEY is not defined");
+}
+
+export const GET = async (_req: NextRequest) => {
   try {
     const kc = new KiteConnect({ api_key: apiKey });
     const loginUrl = kc.getLoginURL();
