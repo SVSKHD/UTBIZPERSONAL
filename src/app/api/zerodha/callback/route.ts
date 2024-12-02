@@ -4,7 +4,7 @@ import { KiteConnect } from "kiteconnect";
 const apiKey = process.env.KITE_API_KEY!;
 const apiSecret = process.env.KITE_API_SECRET!;
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     const { requestToken } = req.body;
 
