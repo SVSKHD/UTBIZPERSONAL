@@ -9,7 +9,7 @@ const apiKey = process.env.KITE_API_KEY;
 
 export const GET = async () => {
   try {
-    const kc = new KiteConnect({ api_key: apiKey });
+    const kc = new KiteConnect({ api_key: apiKey! });
     const loginUrl = kc.getLoginURL();
     return NextResponse.json({ loginUrl });
   } catch (error) {
