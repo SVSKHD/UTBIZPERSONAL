@@ -4,9 +4,9 @@ import { KiteConnect } from "kiteconnect";
 const apiKey = process.env.KITE_API_KEY;
 const apiSecret = process.env.KITE_API_SECRET;
 
-if (!apiKey || !apiSecret) {
-  throw new Error("KITE_API_KEY and KITE_API_SECRET must be defined in environment variables");
-}
+// if (!apiKey || !apiSecret) {
+//   throw new Error("KITE_API_KEY and KITE_API_SECRET must be defined in environment variables");
+// }
 
 export async function POST(req: Request) {
   const body = await req.json();
