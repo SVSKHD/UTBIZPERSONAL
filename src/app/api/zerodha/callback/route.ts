@@ -1,10 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { KiteConnect } from "kiteconnect";
 
-const apiKey = process.env.KITE_API_KEY!;
-const apiSecret = process.env.KITE_API_SECRET!;
+const apiKey = process.env.KITE_API_KEY;
+const apiSecret = process.env.KITE_API_SECRET;
 
-export default async function POST(req: NextApiRequest, res: NextApiResponse) {
+if (!apiKey || !apiSecret) {
+  throw new Error("KITE_API_KEY and KITE_API_SECRET must be defined in environment variables");
+}
+
+export default async function ZerodhaCallBack(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     const { requestToken } = req.body;
 
