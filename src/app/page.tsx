@@ -23,7 +23,7 @@ export default function Home() {
         email: loggedInUser.email,
         photoURL: loggedInUser.photoURL,
       });
-      // router.push("/Dashboard");
+      router.push("/Dashboard");
     } catch (error) {
       console.error("Error during login:", error);
     }
