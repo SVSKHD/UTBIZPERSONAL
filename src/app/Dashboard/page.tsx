@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -13,14 +14,13 @@ const tabs: Tab[] = [
   {
     id: 1,
     label: "Overview",
-    content:
-      "Paragraph 1: Overview of the Dashboard The UTBIZ Dashboard is designed to offer a streamlined and intuitive interface for managing various aspects of your business operations. From the moment you log in, the “Overview” tab provides a high-level summary, welcoming users with key information and an easy-to-navigate layout. Its goal is to serve as a one-stop hub where users can access critical data and tools with minimal effort. The vibrant use of contrasting colors like orange and black creates a professional yet engaging atmosphere, making it easy to focus on the tasks at hand.",
+    content: "Overview content...",
   },
   { id: 2, label: "Settings", content: "Here you can update your settings." },
   { id: 3, label: "Analytics", content: "Check out your analytics data here." },
 ];
 
-export default function Dashboard() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestToken = searchParams.get("request_token");
@@ -29,9 +29,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (requestToken) {
-      console.log("Request Token:", requestToken, router);
+      console.log("Request Token:", requestToken);
     }
-  }, [router,requestToken]);
+  }, [requestToken]);
 
   const handleLogin = async (): Promise<void> => {
     setIsLoginInitiated(true);
@@ -76,14 +76,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white font-sans">
-      {/* Header */}
-      <header className="p-6 border-b border-black bg-black">
-        <h1 className="text-3xl font-bold text-center sm:text-left">
-          <span className="text-orange-500">U</span>TBIZ Dashboard
-        </h1>
-      </header>
-
+    <>
       {/* Tabs Navigation */}
       <nav className="flex justify-center gap-4 p-4 bg-black border-b border-gray-700">
         {tabs.map((tab) => (
@@ -104,7 +97,7 @@ export default function Dashboard() {
       {/* Tab Content */}
       <main className="flex-grow flex flex-col items-start justify-start bg-black">
         <div className="max-w-4xl w-full p-6 border border-gray-700 rounded-md bg-black mt-6 mx-auto">
-          <h2 className="text-2xl/7 font-bold text-orange-500 sm:truncate sm:text-3xl sm:tracking-tight">
+          <h2 className="text-2xl font-bold text-orange-500 sm:truncate sm:text-3xl sm:tracking-tight">
             {tabs.find((tab) => tab.id === activeTab)?.label}
           </h2>
           <p className="text-lg text-gray-300 mt-5">
@@ -126,6 +119,23 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+    </>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <div className="min-h-screen flex flex-col bg-black text-white font-sans">
+      {/* Header */}
+      <header className="p-6 border-b border-black bg-black">
+        <h1 className="text-3xl font-bold text-center sm:text-left">
+          <span className="text-orange-500">U</span>TBIZ Dashboard
+        </h1>
+      </header>
+
+      <Suspense fallback={<div className="p-6 text-center">Loading...</div>}>
+        <DashboardContent />
+      </Suspense>
 
       {/* Footer */}
       <footer className="p-4 text-center text-gray-500 border-t border-gray-700 bg-black">
