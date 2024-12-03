@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 interface Tab {
   id: number;
@@ -21,7 +21,7 @@ const tabs: Tab[] = [
 ];
 
 function DashboardContent() {
-  const router = useRouter();
+  // const router = useRouter();
   const searchParams = useSearchParams();
   const requestToken = searchParams.get("request_token");
   const [activeTab, setActiveTab] = useState<number>(1);
