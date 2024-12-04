@@ -36,7 +36,7 @@ function DashboardContent() {
         localStorage.setItem("requestToken", requestToken);
         setRequestToken(requestToken);
         try {
-          const access: any = await zerodhaOperations.fetchAccessToken(requestToken);
+          const access = await zerodhaOperations.fetchAccessToken(requestToken);
           localStorage.setItem("accessToken", JSON.stringify(access.data.accessToken));
         } catch (error) {
           console.error("Error fetching access token:", error);
