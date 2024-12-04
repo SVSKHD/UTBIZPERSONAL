@@ -30,11 +30,12 @@ function DashboardContent() {
   useEffect(() => {
     if (requestToken) {
       console.log("Request Token:", requestToken);
+      localStorage.setItem("requestToken", requestToken);
     }
   }, [requestToken]);
 
   const handleLogin = async (): Promise<void> => {
-    setIsLoginInitiated(true);
+   
     try {
       const response = await fetch("/api/zerodha/login", {
         method: "GET",
@@ -42,6 +43,7 @@ function DashboardContent() {
       const { loginUrl } = await response.json();
 
       if (loginUrl) {
+        setIsLoginInitiated(true);
         window.location.href = loginUrl;
       } else {
         console.error("Login URL not found");
