@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import zerodhaOperations from "@/services/zerodha";
 
 interface Tab {
   id: number;
@@ -25,13 +26,25 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const requestToken = searchParams.get("request_token");
   const [activeTab, setActiveTab] = useState<number>(1);
+  const [requestTokenState, setRequestToken] = useState<string | null>(null);
   const [isLoginInitiated, setIsLoginInitiated] = useState<boolean>(false);
 
   useEffect(() => {
-    if (requestToken) {
-      console.log("Request Token:", requestToken);
-      localStorage.setItem("requestToken", requestToken);
-    }
+    const fetchAccessToken = async () => {
+      if (requestToken) {
+        console.log("Request Token:", requestToken);
+        localStorage.setItem("requestToken", requestToken);
+        setRequestToken(requestToken);
+        try {
+          const access: unknown = await zerodhaOperations.fetchAccessToken(requestToken);
+          localStorage.setItem("accessToken", access as string);
+        } catch (error) {
+          console.error("Error fetching access token:", error);
+        }
+      }
+    };
+  
+    fetchAccessToken();
   }, [requestToken]);
 
   const handleLogin = async (): Promise<void> => {
@@ -105,6 +118,7 @@ function DashboardContent() {
           <p className="text-lg text-gray-300 mt-5">
             {tabs.find((tab) => tab.id === activeTab)?.content}
           </p>
+          {requestTokenState}
           <button
             className="bg-orange-500 text-white rounded-full px-8 py-3 hover:bg-orange-600 transition mt-5"
             onClick={handleLogin}
