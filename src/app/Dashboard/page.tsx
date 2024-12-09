@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import zerodhaOperations from "@/services/zerodha";
 
@@ -12,47 +11,39 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  {
-    id: 1,
-    label: "Overview",
-    content: "Overview content...",
-  },
+  { id: 1, label: "Overview", content: "Overview content..." },
   { id: 2, label: "Settings", content: "Here you can update your settings." },
   { id: 3, label: "Analytics", content: "Check out your analytics data here." },
 ];
 
 function DashboardContent() {
-  // const router = useRouter();
   const searchParams = useSearchParams();
   const requestToken = searchParams.get("request_token");
   const [activeTab, setActiveTab] = useState<number>(1);
-  const [requestTokenState, setRequestToken] = useState<string | null>(null);
+  const [requestTokenState, setRequestTokenState] = useState<string | null>(null);
   const [isLoginInitiated, setIsLoginInitiated] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchAccessToken = async () => {
-      if (requestToken) {
-        console.log("Request Token:", requestToken);
-        localStorage.setItem("requestToken", requestToken);
-        setRequestToken(requestToken);
+    if (requestToken) {
+      localStorage.setItem("requestToken", requestToken);
+      setRequestTokenState(requestToken);
+
+      const fetchAccessToken = async () => {
         try {
           const access = await zerodhaOperations.fetchAccessToken(requestToken);
           localStorage.setItem("accessToken", JSON.stringify(access.data.accessToken));
         } catch (error) {
           console.error("Error fetching access token:", error);
         }
-      }
-    };
-  
-    fetchAccessToken();
+      };
+
+      fetchAccessToken();
+    }
   }, [requestToken]);
 
-  const handleLogin = async (): Promise<void> => {
-   
+  const handleLogin = async () => {
     try {
-      const response = await fetch("/api/zerodha/login", {
-        method: "GET",
-      });
+      const response = await fetch("/api/zerodha/login");
       const { loginUrl } = await response.json();
 
       if (loginUrl) {
@@ -66,7 +57,7 @@ function DashboardContent() {
     }
   };
 
-  const handleAuthenticate = async (): Promise<void> => {
+  const handleAuthenticate = async () => {
     if (!requestToken) {
       console.error("No request token found in the query");
       return;
@@ -87,6 +78,31 @@ function DashboardContent() {
       }
     } catch (error) {
       console.error("Error during authentication:", error);
+    }
+  };
+
+  const handleFetch = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        console.error("No access token found in local storage");
+        return;
+      }
+
+      const response = await fetch("/api/zerodha/fetchSymbols", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_token: accessToken,
+          type: "EQ",
+          exchange: "NSE",
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Data:", data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
   };
 
@@ -118,7 +134,8 @@ function DashboardContent() {
           <p className="text-lg text-gray-300 mt-5">
             {tabs.find((tab) => tab.id === activeTab)?.content}
           </p>
-          {requestTokenState}
+
+          <p>{requestTokenState}</p>
           <button
             className="bg-orange-500 text-white rounded-full px-8 py-3 hover:bg-orange-600 transition mt-5"
             onClick={handleLogin}
@@ -133,6 +150,12 @@ function DashboardContent() {
               Authenticate
             </button>
           )}
+          <button
+            className="bg-gray-800 text-white rounded-full px-8 py-3 hover:bg-gray-700 transition mt-5"
+            onClick={handleFetch}
+          >
+            Fetch Data
+          </button>
         </div>
       </main>
     </>
