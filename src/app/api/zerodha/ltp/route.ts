@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { KiteConnect } from "kiteconnect";
 
-export async function POST(req: NextRequest) {
+interface Symbol {
+  exchange: string;
+  tradingSymbol: string;
+}
+
+interface LTPResponse {
+  symbol: string;
+  tradingSymbol: string;
+  exchange: string;
+  ltp: number;
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // Parse the request body
-    const { access_token, symbols } = await req.json();
+    // Parse and validate the request body
+    const { access_token, symbols }: { access_token: string; symbols: Symbol[] } = await req.json();
 
     if (!access_token) {
       return NextResponse.json(
@@ -20,6 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Fetch the Kite API key from environment variables
     const apiKey = process.env.KITE_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
@@ -28,26 +41,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Initialize KiteConnect and set the access token
     const kite = new KiteConnect({ api_key: apiKey });
     kite.setAccessToken(access_token);
 
-    // Prepare the symbol array for LTP fetching (e.g., ["NSE:RELIANCE", "NSE:TCS"])
+    // Format symbols for Kite API
     const formattedSymbols = symbols.map(
       (symbol) => `${symbol.exchange}:${symbol.tradingSymbol}`
     );
 
-    // Fetch LTP
+    // Fetch LTP data from Kite API
     const ltpData = await kite.getLTP(formattedSymbols);
 
-    // Map the LTP data to a simpler structure
-    const ltpResponse = Object.keys(ltpData).map((key) => ({
-      symbol: key, // e.g., "NSE:RELIANCE"
-      tradingSymbol: key.split(":")[1], // Extract trading symbol
-      exchange: key.split(":")[0], // Extract exchange
-      ltp: ltpData[key].last_price, // Last Traded Price
-    }));
+    // Transform the LTP data into a simpler structure
+    const ltpResponse: LTPResponse[] = Object.keys(ltpData).map((key) => {
+      const [exchange, tradingSymbol] = key.split(":");
+      return {
+        symbol: key,
+        tradingSymbol,
+        exchange,
+        ltp: ltpData[key].last_price,
+      };
+    });
 
-    // Return the LTP data as JSON response
+    // Return the LTP data as a JSON response
     return NextResponse.json({ ltp: ltpResponse });
   } catch (error) {
     console.error("Error fetching LTP:", error);
